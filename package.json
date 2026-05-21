@@ -1,0 +1,15 @@
+{
+  "name": "utiles-escolares",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema de pedidos de útiles escolares",
+  "scripts": {
+    "install:all": "npm install --prefix back && npm install --prefix front",
+    "init-db": "npm run init-db --prefix back",
+    "dev:back": "npm run dev --prefix back",
+    "dev:front": "npm run dev --prefix front",
+    "dev": "npm run dev:back & npm run dev:front",
+    "start:back": "npm start --prefix back",
+    "build": "npm run build --prefix front"
+  }
+}
