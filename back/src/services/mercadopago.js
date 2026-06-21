@@ -1,10 +1,13 @@
 import { MercadoPagoConfig, Payment, Preference, User } from 'mercadopago';
+import pool from '../config/db.js';
 
 let cachedAccountInfo = null;
+let dbAccessToken = null;
 
 export function getAccessToken() {
   return (
     process.env.MERCADOPAGO_TOKEN?.trim() ||
+    dbAccessToken ||
     process.env.MP_ACCESS_TOKEN_PROD?.trim() ||
     process.env.MP_ACCESS_TOKEN?.trim() ||
     ''
@@ -13,9 +16,25 @@ export function getAccessToken() {
 
 export function getAccessTokenSource() {
   if (process.env.MERCADOPAGO_TOKEN?.trim()) return 'MERCADOPAGO_TOKEN';
+  if (dbAccessToken) return 'database';
   if (process.env.MP_ACCESS_TOKEN_PROD?.trim()) return 'MP_ACCESS_TOKEN_PROD';
   if (process.env.MP_ACCESS_TOKEN?.trim()) return 'MP_ACCESS_TOKEN';
   return null;
+}
+
+export async function loadMercadoPagoTokenFromDb() {
+  try {
+    const result = await pool.query(
+      "SELECT value FROM app_settings WHERE key = 'mercadopago_token' LIMIT 1"
+    );
+    dbAccessToken = result.rows[0]?.value?.trim() || null;
+    if (dbAccessToken) {
+      cachedAccountInfo = null;
+      console.log('✓ Token de Mercado Pago cargado desde la base de datos.');
+    }
+  } catch (error) {
+    console.warn('No se pudo cargar mercadopago_token desde BD:', error.message);
+  }
 }
 
 export function getCredentialMode() {

@@ -1,4 +1,5 @@
 import pool from './db.js';
+import { loadMercadoPagoTokenFromDb } from '../services/mercadopago.js';
 
 export async function ensureDatabaseSchema() {
   try {
@@ -68,6 +69,12 @@ export async function ensureDatabaseSchema() {
         metodo_pago VARCHAR(50),
         detalle TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS app_settings (
+        key VARCHAR(100) PRIMARY KEY,
+        value TEXT NOT NULL,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -153,6 +160,8 @@ export async function ensureDatabaseSchema() {
         );
       `);
     }
+
+    await loadMercadoPagoTokenFromDb();
   } catch (error) {
     console.error('Error al verificar esquema de base de datos:', error.message);
     throw error;
