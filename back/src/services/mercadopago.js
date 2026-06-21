@@ -31,10 +31,6 @@ export function isPaymentEnabled() {
 /** Monto mínimo en MXN para tarjetas Visa/Mastercard en Mercado Pago México. */
 export const MP_MIN_CARD_AMOUNT_MXN = 5;
 
-function isTestCredentials() {
-  return getCredentialMode() === 'test';
-}
-
 export function isTestSellerAccount(account) {
   return account?.tags?.includes('test_user') ?? false;
 }
