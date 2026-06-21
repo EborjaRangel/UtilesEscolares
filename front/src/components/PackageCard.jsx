@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom';
+'use client';
+
+import Link from 'next/link';
 
 function formatPrice(price) {
   return new Intl.NumberFormat('es-MX', {
@@ -50,10 +52,7 @@ export default function PackageCard({ paquete }) {
           )}
         </ul>
 
-        <Link
-          to={`/pedido/${paquete.id}`}
-          className="btn-primary mt-auto w-full text-center"
-        >
+        <Link href={`/pedido/${paquete.id}`} className="btn-primary mt-auto w-full text-center">
           Pedir este paquete
         </Link>
       </div>

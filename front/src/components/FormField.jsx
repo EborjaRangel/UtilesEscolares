@@ -1,3 +1,5 @@
+'use client';
+
 import { Field } from 'formik';
 
 export default function FormField({
@@ -8,10 +10,12 @@ export default function FormField({
   as = 'input',
   options = [],
   rows,
+  onChange,
+  disabled = false,
 }) {
   return (
     <Field name={name}>
-      {({ field, meta }) => (
+      {({ field, meta, form }) => (
         <div className="mb-4">
           <label htmlFor={name} className="label-field">
             {label}
@@ -21,6 +25,11 @@ export default function FormField({
             <select
               {...field}
               id={name}
+              disabled={disabled}
+              onChange={(e) => {
+                field.onChange(e);
+                onChange?.(e.target.value, form);
+              }}
               className={`input-field ${meta.touched && meta.error ? 'input-error' : ''}`}
             >
               {options.map((opt) => (
@@ -47,9 +56,7 @@ export default function FormField({
             />
           )}
 
-          {meta.touched && meta.error && (
-            <p className="error-text">{meta.error}</p>
-          )}
+          {meta.touched && meta.error && <p className="error-text">{meta.error}</p>}
         </div>
       )}
     </Field>

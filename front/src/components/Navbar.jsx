@@ -1,10 +1,14 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
+  const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -17,38 +21,55 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     setMenuOpen(false);
-    navigate('/');
+    router.push('/');
   };
 
-  const linkClass = ({ isActive }) =>
-    `block rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
+  const linkClass = (href) => {
+    const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
+    return `block rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
       isActive
         ? 'bg-escolar-yellow/30 text-escolar-navy'
         : 'text-escolar-navy/80 hover:bg-escolar-sky hover:text-escolar-navy'
     }`;
+  };
 
   const navLinks = (
     <>
-      <NavLink to="/" className={linkClass} end onClick={() => setMenuOpen(false)}>
+      <Link href="/" className={linkClass('/')} onClick={() => setMenuOpen(false)}>
         Inicio
-      </NavLink>
-      <NavLink to="/paquetes" className={linkClass} onClick={() => setMenuOpen(false)}>
+      </Link>
+      <Link href="/paquetes" className={linkClass('/paquetes')} onClick={() => setMenuOpen(false)}>
         Paquetes
-      </NavLink>
+      </Link>
       {isAuthenticated && (
-        <NavLink to="/mis-pedidos" className={linkClass} onClick={() => setMenuOpen(false)}>
+        <Link
+          href="/mis-pedidos"
+          className={linkClass('/mis-pedidos')}
+          onClick={() => setMenuOpen(false)}
+        >
           Mis pedidos
-        </NavLink>
+        </Link>
+      )}
+      {user?.rol === 'admin' && (
+        <Link
+          href="/admin/caja"
+          className={linkClass('/admin/caja')}
+          onClick={() => setMenuOpen(false)}
+        >
+          Caja
+        </Link>
       )}
     </>
   );
+
+  const displayName = user ? [user.nombre, user.apellido].filter(Boolean).join(' ') : '';
 
   return (
     <header className="sticky top-0 z-50 border-b border-escolar-sky/60 bg-white/95 shadow-sm backdrop-blur-md">
       <div className="container-app">
         <div className="flex items-center justify-between gap-2 py-3 sm:py-4">
           <Link
-            to="/"
+            href="/"
             className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 sm:flex-none"
             onClick={() => setMenuOpen(false)}
           >
@@ -70,8 +91,8 @@ export default function Navbar() {
           <div className="flex shrink-0 items-center gap-1 sm:gap-2">
             {isAuthenticated ? (
               <>
-                <span className="hidden max-w-[120px] truncate text-sm font-medium text-escolar-navy xl:inline">
-                  Hola, {user.nombre}
+                <span className="hidden whitespace-nowrap text-sm font-medium text-escolar-navy lg:inline">
+                  Hola, {displayName}
                 </span>
                 <button
                   type="button"
@@ -83,10 +104,10 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link to="/login" className="btn-secondary hidden py-2 text-sm lg:inline-flex">
+                <Link href="/login" className="btn-secondary hidden py-2 text-sm lg:inline-flex">
                   Iniciar sesión
                 </Link>
-                <Link to="/registro" className="btn-accent hidden py-2 text-sm xl:inline-flex">
+                <Link href="/registro" className="btn-accent hidden py-2 text-sm xl:inline-flex">
                   Registrarse
                 </Link>
               </>
@@ -124,8 +145,8 @@ export default function Navbar() {
               <div className="mt-3 flex flex-col gap-2 border-t border-escolar-sky/40 pt-3">
                 {isAuthenticated ? (
                   <>
-                    <p className="truncate px-3 text-sm font-medium text-escolar-navy">
-                      Hola, {user.nombre}
+                    <p className="px-3 text-sm font-medium text-escolar-navy">
+                      Hola, {displayName}
                     </p>
                     <button type="button" onClick={handleLogout} className="btn-secondary w-full py-2 text-sm">
                       Salir
@@ -134,14 +155,14 @@ export default function Navbar() {
                 ) : (
                   <>
                     <Link
-                      to="/login"
+                      href="/login"
                       className="btn-secondary w-full py-2 text-center text-sm"
                       onClick={() => setMenuOpen(false)}
                     >
                       Iniciar sesión
                     </Link>
                     <Link
-                      to="/registro"
+                      href="/registro"
                       className="btn-accent w-full py-2 text-center text-sm"
                       onClick={() => setMenuOpen(false)}
                     >

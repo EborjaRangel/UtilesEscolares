@@ -17,3 +17,10 @@ export function authMiddleware(req, res, next) {
     return res.status(401).json({ message: 'Sesión inválida o expirada' });
   }
 }
+
+export function adminMiddleware(req, res, next) {
+  if (req.user?.rol !== 'admin') {
+    return res.status(403).json({ message: 'Acceso restringido a administradores' });
+  }
+  next();
+}

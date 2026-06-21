@@ -1,5 +1,7 @@
+'use client';
+
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import api from '../api/axios';
+import api from '@/api/axios';
 
 const AuthContext = createContext(null);
 
@@ -43,7 +45,15 @@ export function AuthProvider({ children }) {
   };
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, isAuthenticated: !!user }),
+    () => ({
+      user,
+      loading,
+      login,
+      register,
+      logout,
+      isAuthenticated: !!user,
+      isAdmin: user?.rol === 'admin',
+    }),
     [user, loading]
   );
 

@@ -6,6 +6,7 @@
   "scripts": {
     "install:all": "npm install --prefix back && npm install --prefix front",
     "init-db": "npm run init-db --prefix back",
+    "create-admin": "npm run create-admin --prefix back",
     "dev:back": "npm run dev --prefix back",
     "dev:front": "npm run dev --prefix front",
     "dev": "npm run dev:back & npm run dev:front",

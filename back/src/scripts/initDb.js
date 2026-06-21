@@ -68,6 +68,14 @@ async function initDatabase() {
         grado_estudiante VARCHAR(50) NOT NULL,
         escuela VARCHAR(200) NOT NULL,
         direccion_entrega TEXT NOT NULL,
+        alcaldia VARCHAR(100),
+        colonia VARCHAR(150),
+        calle VARCHAR(200),
+        numero_exterior VARCHAR(20),
+        numero_interior VARCHAR(20),
+        lat DECIMAL(10, 7),
+        lng DECIMAL(10, 7),
+        codigo_postal VARCHAR(10),
         notas TEXT,
         total DECIMAL(10, 2) NOT NULL,
         estado VARCHAR(30) DEFAULT 'pendiente',
@@ -95,7 +103,7 @@ async function initDatabase() {
           'Paquete Preescolar',
           'Todo lo necesario para dar el primer paso al mundo escolar con colores y diversión.',
           'Preescolar',
-          450.00,
+          1.00,
           '["Crayones gruesos (12)", "Plastilina (4 colores)", "Tijeras de punta redonda", "Block de dibujo", "Pegamento en barra", "Mochila pequeña"]'::jsonb,
           '#E76F51'
         ),
@@ -103,7 +111,7 @@ async function initDatabase() {
           'Paquete Primaria Baja',
           'Útiles esenciales para 1° a 3° de primaria, listos para el aula.',
           '1° - 3° Primaria',
-          680.00,
+          2.50,
           '["Cuadernos profesionales (5)", "Lápices del #2 (12)", "Colores de madera (24)", "Regla de 30 cm", "Goma y sacapuntas", "Folder de colores (3)"]'::jsonb,
           '#F4B942'
         ),
@@ -111,7 +119,7 @@ async function initDatabase() {
           'Paquete Primaria Alta',
           'Herramientas completas para 4° a 6° de primaria con enfoque académico.',
           '4° - 6° Primaria',
-          850.00,
+          3.75,
           '["Cuadernos profesionales (8)", "Plumas azul y negra (6)", "Marcadores de colores (12)", "Calculadora básica", "Compás y transportador", "Diccionario escolar"]'::jsonb,
           '#2D6A4F'
         ),
@@ -119,7 +127,7 @@ async function initDatabase() {
           'Paquete Secundaria',
           'Paquete completo para estudiantes de secundaria con materiales avanzados.',
           'Secundaria',
-          1200.00,
+          5.00,
           '["Cuadernos profesionales (10)", "Plumas de gel (6)", "Calculadora científica", "Resaltadores (5)", "Folder con broche (4)", "USB 16GB", "Diccionario y atlas"]'::jsonb,
           '#1E3A5F'
         );

@@ -23,14 +23,18 @@ router.post('/register', async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      `INSERT INTO usuarios (nombre, apellido, email, password_hash, telefono)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, nombre, apellido, email, telefono, created_at`,
+      `INSERT INTO usuarios (nombre, apellido, email, password_hash, telefono, rol)
+       VALUES ($1, $2, $3, $4, $5, 'cliente')
+       RETURNING id, nombre, apellido, email, telefono, rol, created_at`,
       [nombre.trim(), apellido.trim(), email.toLowerCase().trim(), passwordHash, telefono?.trim() || null]
     );
 
     const user = result.rows[0];
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { id: user.id, email: user.email, rol: user.rol || 'cliente' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     res.status(201).json({ user, token });
   } catch (error) {
@@ -48,7 +52,7 @@ router.post('/login', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'SELECT id, nombre, apellido, email, telefono, password_hash, created_at FROM usuarios WHERE email = $1',
+      'SELECT id, nombre, apellido, email, telefono, password_hash, rol, created_at FROM usuarios WHERE email = $1',
       [email.toLowerCase().trim()]
     );
 
@@ -65,7 +69,11 @@ router.post('/login', async (req, res) => {
 
     delete user.password_hash;
 
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { id: user.id, email: user.email, rol: user.rol || 'cliente' },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     res.json({ user, token });
   } catch (error) {
@@ -77,7 +85,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authMiddleware, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, nombre, apellido, email, telefono, created_at FROM usuarios WHERE id = $1',
+      'SELECT id, nombre, apellido, email, telefono, rol, created_at FROM usuarios WHERE id = $1',
       [req.user.id]
     );
 

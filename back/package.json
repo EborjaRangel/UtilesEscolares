@@ -7,7 +7,10 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "init-db": "node src/scripts/initDb.js"
+    "dev:back": "node --watch src/index.js",
+    "init-db": "node src/scripts/initDb.js",
+    "create-admin": "node src/scripts/createAdmin.js",
+    "update-test-prices": "node src/scripts/updateTestPrices.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -15,6 +18,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
+    "mercadopago": "^3.1.0",
     "pg": "^8.13.0",
     "utiles-escolares": "file:.."
   }

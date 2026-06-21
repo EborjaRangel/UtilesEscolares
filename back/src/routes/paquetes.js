@@ -1,7 +1,15 @@
 import { Router } from 'express';
 import pool from '../config/db.js';
+import { getGradosPermitidos } from '../utils/paqueteGrados.js';
 
 const router = Router();
+
+function enrichPaquete(row) {
+  return {
+    ...row,
+    grados_permitidos: getGradosPermitidos(row.grado),
+  };
+}
 
 router.get('/', async (_req, res) => {
   try {
@@ -12,7 +20,7 @@ router.get('/', async (_req, res) => {
        ORDER BY precio ASC`
     );
 
-    res.json(result.rows);
+    res.json(result.rows.map(enrichPaquete));
   } catch (error) {
     console.error('Error al obtener paquetes:', error);
     res.status(500).json({ message: 'Error al obtener paquetes' });
@@ -32,7 +40,7 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ message: 'Paquete no encontrado' });
     }
 
-    res.json(result.rows[0]);
+    res.json(enrichPaquete(result.rows[0]));
   } catch (error) {
     console.error('Error al obtener paquete:', error);
     res.status(500).json({ message: 'Error al obtener paquete' });

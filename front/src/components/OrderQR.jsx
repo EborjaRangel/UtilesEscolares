@@ -1,5 +1,7 @@
+'use client';
+
 import { QRCodeCanvas } from 'qrcode.react';
-import { buildPedidoQrUrl } from '../utils/qrPedido';
+import { buildPedidoQrUrl } from '@/utils/qrPedido';
 
 export default function OrderQR({ pedido, size = 100, showCode = true, showLabel = false }) {
   if (!pedido?.id) return null;
@@ -29,9 +31,7 @@ export default function OrderQR({ pedido, size = 100, showCode = true, showLabel
         />
       </div>
       {showCode && (
-        <p className="mt-2 text-center text-xs font-bold text-escolar-navy">
-          {codigo}
-        </p>
+        <p className="mt-2 text-center text-xs font-bold text-escolar-navy">{codigo}</p>
       )}
     </div>
   );
