@@ -5,7 +5,10 @@ let cachedAccountInfo = null;
 export function getCredentialMode() {
   const token = process.env.MP_ACCESS_TOKEN?.trim() || '';
   if (token.startsWith('TEST-')) return 'test';
-  if (token.startsWith('APP_USR-')) return 'production';
+  // Producción: APP_USR-{userId}-{fecha MMDDYY}-...
+  if (/^APP_USR-\d+-\d{6}-/.test(token)) return 'production';
+  // Prueba: APP_USR-{uuid}-{uuid}-...
+  if (token.startsWith('APP_USR-')) return 'test';
   return 'unknown';
 }
 
@@ -45,12 +48,19 @@ export async function getAccountInfo() {
 }
 
 export async function getSellerMode() {
-  if (isTestCredentials()) return 'test';
+  if (process.env.MP_SANDBOX === 'true') return 'test';
+  if (process.env.MP_SANDBOX === 'false') return 'production';
+
+  const credentialMode = getCredentialMode();
+  if (credentialMode === 'test' || credentialMode === 'production') {
+    return credentialMode;
+  }
+
   try {
     const account = await getAccountInfo();
     return isTestSellerAccount(account) ? 'test' : 'production';
   } catch {
-    return getCredentialMode() === 'production' ? 'production' : 'unknown';
+    return 'unknown';
   }
 }
 
