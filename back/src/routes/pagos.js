@@ -6,6 +6,7 @@ import {
   fetchPayment,
   getAccountInfo,
   getAccessToken,
+  getAccessTokenSource,
   getSellerMode,
   isMercadoPagoConfigured,
   isMockPaymentMode,
@@ -39,7 +40,10 @@ router.get('/config', async (_req, res) => {
     testMode: sellerMode === 'test' || sellerMode === 'mock',
     sellerAccount,
     credentialUserId: getAccessToken().split('-').pop() || null,
-    credentialSource: process.env.MP_ACCESS_TOKEN_PROD ? 'MP_ACCESS_TOKEN_PROD' : 'MP_ACCESS_TOKEN',
+    credentialSource: getAccessTokenSource(),
+    mpEnvVars: Object.keys(process.env)
+      .filter((key) => key.startsWith('MP_') || key === 'MERCADOPAGO_TOKEN')
+      .sort(),
     hint:
       sellerMode === 'production'
         ? `Mercado Pago exige mínimo $${MP_MIN_CARD_AMOUNT_MXN} MXN para pagar con Visa/Mastercard. Usa incógnito, paga sin cuenta del vendedor y escribe la tarjeta sin espacios.`

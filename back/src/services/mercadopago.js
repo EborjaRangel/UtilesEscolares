@@ -3,7 +3,19 @@ import { MercadoPagoConfig, Payment, Preference, User } from 'mercadopago';
 let cachedAccountInfo = null;
 
 export function getAccessToken() {
-  return (process.env.MP_ACCESS_TOKEN_PROD || process.env.MP_ACCESS_TOKEN || '').trim();
+  return (
+    process.env.MERCADOPAGO_TOKEN?.trim() ||
+    process.env.MP_ACCESS_TOKEN_PROD?.trim() ||
+    process.env.MP_ACCESS_TOKEN?.trim() ||
+    ''
+  );
+}
+
+function getAccessTokenSource() {
+  if (process.env.MERCADOPAGO_TOKEN?.trim()) return 'MERCADOPAGO_TOKEN';
+  if (process.env.MP_ACCESS_TOKEN_PROD?.trim()) return 'MP_ACCESS_TOKEN_PROD';
+  if (process.env.MP_ACCESS_TOKEN?.trim()) return 'MP_ACCESS_TOKEN';
+  return null;
 }
 
 export function getCredentialMode() {
