@@ -1,12 +1,7 @@
 import { Router } from 'express';
 import pool from '../../config/db.js';
 import { authMiddleware, adminMiddleware } from '../../middleware/auth.js';
-import {
-  isMercadoPagoConfigured,
-  mapPaymentStatus,
-  mapPedidoEstado,
-  searchPaymentsByReference,
-} from '../../services/mercadopago.js';
+import { syncPedidoFromMercadoPago } from '../../services/pedidoPago.js';
 import { ENTREGA_MAX_HORAS, validarFechaEntrega } from '../../utils/entrega.js';
 
 const router = Router();
@@ -28,47 +23,6 @@ const QR_CONDITION = `p.codigo_qr IS NOT NULL AND TRIM(p.codigo_qr) <> ''`;
 
 /** Solo pedidos pagados en Mercado Pago y con código QR generado. */
 const CAJA_PEDIDO_CONDITION = `p.pago_estado = 'approved' AND ${QR_CONDITION}`;
-
-const PAYMENT_STATUS_PRIORITY = {
-  approved: 3,
-  authorized: 2,
-  in_process: 1,
-  pending: 1,
-  in_mediation: 1,
-  rejected: 0,
-  cancelled: 0,
-};
-
-async function syncPedidoFromMercadoPago(pedidoId) {
-  if (!isMercadoPagoConfigured()) return null;
-
-  const payments = await searchPaymentsByReference(pedidoId);
-  if (payments.length === 0) return null;
-
-  const bestPayment = [...payments].sort(
-    (a, b) => (PAYMENT_STATUS_PRIORITY[b.status] ?? -1) - (PAYMENT_STATUS_PRIORITY[a.status] ?? -1)
-  )[0];
-
-  const pagoEstado = mapPaymentStatus(bestPayment.status);
-  const estado = mapPedidoEstado(pagoEstado);
-
-  const result = await pool.query(
-    `UPDATE pedidos
-     SET pago_estado = $1,
-         estado = $2,
-         mp_payment_id = COALESCE($3, mp_payment_id),
-         pagado_at = CASE
-           WHEN $1 = 'approved' THEN COALESCE(pagado_at, CURRENT_TIMESTAMP)
-           ELSE pagado_at
-         END,
-         updated_at = CURRENT_TIMESTAMP
-     WHERE id = $4
-     RETURNING id`,
-    [pagoEstado, estado, String(bestPayment.id), pedidoId]
-  );
-
-  return result.rows[0] || null;
-}
 
 function filtroSql(filtro) {
   switch (filtro) {
@@ -264,7 +218,9 @@ router.patch('/pedidos/:id/estado', async (req, res) => {
 
     const result = await pool.query(
       `UPDATE pedidos
-       SET estado = $1, updated_at = CURRENT_TIMESTAMP
+       SET estado = $1,
+           entregado_at = CASE WHEN $1 = 'entregado' THEN CURRENT_TIMESTAMP ELSE NULL END,
+           updated_at = CURRENT_TIMESTAMP
        WHERE id = $2
        RETURNING id`,
       [estado, pedidoId]

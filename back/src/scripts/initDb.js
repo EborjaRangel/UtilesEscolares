@@ -44,6 +44,7 @@ async function initDatabase() {
         email VARCHAR(150) UNIQUE NOT NULL,
         password_hash VARCHAR(255) NOT NULL,
         telefono VARCHAR(20),
+        rol VARCHAR(20) DEFAULT 'cliente',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -78,9 +79,30 @@ async function initDatabase() {
         codigo_postal VARCHAR(10),
         notas TEXT,
         total DECIMAL(10, 2) NOT NULL,
-        estado VARCHAR(30) DEFAULT 'pendiente',
+        estado VARCHAR(30) DEFAULT 'pendiente_pago',
         codigo_qr VARCHAR(50) UNIQUE,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        pago_estado VARCHAR(30) DEFAULT 'pending',
+        mp_preference_id VARCHAR(100),
+        mp_payment_id VARCHAR(100),
+        pagado_at TIMESTAMP,
+        fecha_entrega_programada TIMESTAMP,
+        notas_entrega TEXT,
+        entregado_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS pagos (
+        id SERIAL PRIMARY KEY,
+        pedido_id INTEGER NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+        mp_payment_id VARCHAR(100) UNIQUE,
+        estado_mp VARCHAR(30),
+        pago_estado VARCHAR(30) NOT NULL,
+        monto DECIMAL(10, 2),
+        metodo_pago VARCHAR(50),
+        detalle TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
 

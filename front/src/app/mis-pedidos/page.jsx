@@ -197,7 +197,7 @@ function MisPedidosContent() {
                 {pedido.notas && (
                   <div className="sm:col-span-2">
                     <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-                      Notas
+                      Instrucciones especiales de entrega
                     </p>
                     <p className="break-words text-sm text-escolar-navy">{pedido.notas}</p>
                   </div>

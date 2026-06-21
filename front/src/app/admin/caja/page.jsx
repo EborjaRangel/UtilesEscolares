@@ -180,6 +180,14 @@ function PedidoCajaCard({ pedido, onUpdated }) {
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Entrega</p>
             <p className="text-sm text-escolar-navy">{formatDireccionDisplay(pedido)}</p>
           </div>
+          {pedido.notas && (
+            <div className="sm:col-span-2 rounded-lg bg-amber-50 px-3 py-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-amber-900">
+                Instrucciones especiales de entrega
+              </p>
+              <p className="text-sm text-escolar-navy">{pedido.notas}</p>
+            </div>
+          )}
           {pedido.fecha_entrega_programada && (
             <div className="sm:col-span-2 rounded-lg bg-escolar-sky/40 px-3 py-2">
               <p className="text-xs font-semibold uppercase tracking-wide text-escolar-blue">

@@ -17,7 +17,7 @@ const PEDIDO_SELECT = `
   p.direccion_entrega, p.alcaldia, p.colonia, p.calle,
   p.numero_exterior, p.numero_interior, p.codigo_postal, p.lat, p.lng,
   p.notas, p.total, p.estado, p.codigo_qr, p.pago_estado, p.pagado_at,
-  p.fecha_entrega_programada, p.created_at
+  p.fecha_entrega_programada, p.notas_entrega, p.entregado_at, p.created_at
 `;
 
 router.get('/consulta/:codigo', async (req, res) => {
@@ -138,6 +138,7 @@ router.post('/', async (req, res) => {
 
     const precio = Number(paquete.precio);
     const total = precio * qty;
+    const notasEntrega = notas?.trim() ? notas.trim() : null;
 
     if (total < MP_MIN_CARD_AMOUNT_MXN) {
       return res.status(400).json({
@@ -171,7 +172,7 @@ router.post('/', async (req, res) => {
         codigo_postal.trim(),
         Number(lat),
         Number(lng),
-        notas?.trim() || null,
+        notasEntrega,
         total,
         codigo_qr,
         'pendiente_pago',
@@ -181,31 +182,26 @@ router.post('/', async (req, res) => {
 
     const pedido = result.rows[0];
 
-    try {
-      const { preferenceId, checkoutUrl } = await createCheckoutPreference({
-        pedidoId: pedido.id,
-        paqueteNombre: paquete.nombre,
-        cantidad: qty,
-        unitPrice: precio,
-        payerEmail: req.user.email,
-      });
+    const { preferenceId, checkoutUrl } = await createCheckoutPreference({
+      pedidoId: pedido.id,
+      paqueteNombre: paquete.nombre,
+      cantidad: qty,
+      unitPrice: precio,
+      payerEmail: req.user.email,
+    });
 
-      await pool.query(
-        `UPDATE pedidos SET mp_preference_id = $1 WHERE id = $2`,
-        [preferenceId, pedido.id]
-      );
+    await pool.query(`UPDATE pedidos SET mp_preference_id = $1 WHERE id = $2`, [
+      preferenceId,
+      pedido.id,
+    ]);
 
-      res.status(201).json({
-        ...pedido,
-        mp_preference_id: preferenceId,
-        checkout_url: checkoutUrl,
-        paquete_nombre: paquete.nombre,
-        paquete_grado: paquete.grado,
-      });
-    } catch (paymentError) {
-      await pool.query('DELETE FROM pedidos WHERE id = $1', [pedido.id]);
-      throw paymentError;
-    }
+    res.status(201).json({
+      ...pedido,
+      mp_preference_id: preferenceId,
+      checkout_url: checkoutUrl,
+      paquete_nombre: paquete.nombre,
+      paquete_grado: paquete.grado,
+    });
   } catch (error) {
     console.error('Error al crear pedido:', error);
 

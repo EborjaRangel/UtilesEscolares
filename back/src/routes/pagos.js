@@ -8,11 +8,9 @@ import {
   isMercadoPagoConfigured,
   isMockPaymentMode,
   isPaymentEnabled,
-  mapPaymentStatus,
-  mapPedidoEstado,
   MP_MIN_CARD_AMOUNT_MXN,
-  searchPaymentsByReference,
 } from '../services/mercadopago.js';
+import { syncPedidoFromMercadoPago, updatePedidoPago } from '../services/pedidoPago.js';
 
 const router = Router();
 
@@ -38,53 +36,8 @@ const PEDIDO_SELECT = `
   p.direccion_entrega, p.alcaldia, p.colonia, p.calle,
   p.numero_exterior, p.numero_interior, p.codigo_postal, p.lat, p.lng,
   p.notas, p.total, p.estado, p.codigo_qr, p.pago_estado, p.mp_payment_id,
-  p.fecha_entrega_programada, p.notas_entrega, p.pagado_at, p.created_at
+  p.fecha_entrega_programada, p.notas_entrega, p.pagado_at, p.entregado_at, p.created_at
 `;
-
-const PAYMENT_STATUS_PRIORITY = {
-  approved: 3,
-  authorized: 2,
-  in_process: 1,
-  pending: 1,
-  in_mediation: 1,
-  rejected: 0,
-  cancelled: 0,
-};
-
-async function syncPedidoFromMercadoPago(pedidoId) {
-  if (!isMercadoPagoConfigured()) return null;
-
-  const payments = await searchPaymentsByReference(pedidoId);
-  if (payments.length === 0) return null;
-
-  const bestPayment = [...payments].sort(
-    (a, b) => (PAYMENT_STATUS_PRIORITY[b.status] ?? -1) - (PAYMENT_STATUS_PRIORITY[a.status] ?? -1)
-  )[0];
-
-  return updatePedidoPago(pedidoId, bestPayment.id, bestPayment.status);
-}
-
-async function updatePedidoPago(pedidoId, paymentId, mpStatus) {
-  const pagoEstado = mapPaymentStatus(mpStatus);
-  const estado = mapPedidoEstado(pagoEstado);
-
-  const result = await pool.query(
-    `UPDATE pedidos
-     SET pago_estado = $1,
-         estado = $2,
-         mp_payment_id = COALESCE($3, mp_payment_id),
-         pagado_at = CASE
-           WHEN $1 = 'approved' THEN COALESCE(pagado_at, CURRENT_TIMESTAMP)
-           ELSE pagado_at
-         END,
-         updated_at = CURRENT_TIMESTAMP
-     WHERE id = $4
-     RETURNING *`,
-    [pagoEstado, estado, paymentId ? String(paymentId) : null, pedidoId]
-  );
-
-  return result.rows[0] || null;
-}
 
 router.post('/checkout/:pedidoId', authMiddleware, async (req, res) => {
   if (!isPaymentEnabled()) {
@@ -165,7 +118,7 @@ router.post('/webhook', async (req, res) => {
       return res.status(200).send('OK');
     }
 
-    await updatePedidoPago(pedidoId, payment.id, payment.status);
+    await updatePedidoPago(pedidoId, payment.id, payment.status, payment);
     res.status(200).send('OK');
   } catch (error) {
     console.error('Error en webhook de pago:', error);
@@ -246,7 +199,7 @@ router.get('/verificar/:pedidoId', authMiddleware, async (req, res) => {
           return res.status(400).json({ message: 'El pago no corresponde a este pedido' });
         }
 
-        const updated = await updatePedidoPago(pedidoId, payment.id, payment.status);
+        const updated = await updatePedidoPago(pedidoId, payment.id, payment.status, payment);
 
         if (updated) {
           pedido = {

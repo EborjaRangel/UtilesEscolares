@@ -45,6 +45,33 @@ export async function ensureDatabaseSchema() {
       SET pagado_at = COALESCE(updated_at, created_at)
       WHERE pago_estado = 'approved' AND pagado_at IS NULL;
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS pagos (
+        id SERIAL PRIMARY KEY,
+        pedido_id INTEGER NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+        mp_payment_id VARCHAR(100) UNIQUE,
+        estado_mp VARCHAR(30),
+        pago_estado VARCHAR(30) NOT NULL,
+        monto DECIMAL(10, 2),
+        metodo_pago VARCHAR(50),
+        detalle TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await pool.query(`
+      ALTER TABLE pedidos ADD COLUMN IF NOT EXISTS entregado_at TIMESTAMP;
+    `);
+
+    await pool.query(`
+      INSERT INTO pagos (pedido_id, mp_payment_id, estado_mp, pago_estado, monto)
+      SELECT p.id, p.mp_payment_id, 'approved', p.pago_estado, p.total
+      FROM pedidos p
+      WHERE p.mp_payment_id IS NOT NULL
+      ON CONFLICT (mp_payment_id) DO NOTHING;
+    `);
   } catch (error) {
     console.error('Error al verificar esquema de base de datos:', error.message);
     throw error;

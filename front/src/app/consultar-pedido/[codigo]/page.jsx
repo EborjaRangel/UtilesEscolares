@@ -151,7 +151,7 @@ export default function ConsultarPedidoPage() {
             />
             <DetailItem label="Correo" value={pedido.cliente_email} />
             <DetailItem label="Teléfono" value={pedido.cliente_telefono || 'No registrado'} />
-            <DetailItem label="Notas" value={pedido.notas} />
+            <DetailItem label="Instrucciones de entrega" value={pedido.notas} />
           </div>
         </div>
 

@@ -156,7 +156,7 @@ function PedidoContent() {
                       calle: values.calle,
                       lat: values.lat,
                       lng: values.lng,
-                      notas: values.notas,
+                      notas: values.notas?.trim() || '',
                     });
                     if (!data.checkout_url) {
                       setServerError('No se pudo abrir la pasarela de Mercado Pago');
@@ -319,11 +319,11 @@ function PedidoContent() {
                       />
 
                       <FormField
-                        label="Notas adicionales (opcional)"
+                        label="Instrucciones especiales de entrega (opcional)"
                         name="notas"
                         as="textarea"
-                        rows={2}
-                        placeholder="Instrucciones especiales de entrega"
+                        rows={3}
+                        placeholder="Ej. Tocar el timbre, entregar por la tarde, portón azul..."
                       />
 
                       <div className="mb-5 rounded-xl bg-escolar-sky/50 px-4 py-3 sm:mb-6">
