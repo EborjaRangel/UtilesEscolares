@@ -26,7 +26,7 @@ router.get('/config', async (_req, res) => {
       sellerMode === 'production'
         ? `Mercado Pago exige mínimo $${MP_MIN_CARD_AMOUNT_MXN} MXN para pagar con Visa/Mastercard. Usa incógnito, paga sin cuenta del vendedor y escribe la tarjeta sin espacios.`
         : sellerMode === 'test'
-          ? 'Modo prueba de Mercado Pago.'
+          ? 'Cuenta de prueba de Mercado Pago: solo tarjetas de test (4509 9535 6623 3704, titular APRO). Para cobros reales activa credenciales de producción en el panel de Mercado Pago.'
           : null,
   });
 });

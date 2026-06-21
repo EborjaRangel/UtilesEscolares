@@ -5,10 +5,7 @@ let cachedAccountInfo = null;
 export function getCredentialMode() {
   const token = process.env.MP_ACCESS_TOKEN?.trim() || '';
   if (token.startsWith('TEST-')) return 'test';
-  // Producción: APP_USR-{userId}-{fecha MMDDYY}-...
-  if (/^APP_USR-\d+-\d{6}-/.test(token)) return 'production';
-  // Prueba: APP_USR-{uuid}-{uuid}-...
-  if (token.startsWith('APP_USR-')) return 'test';
+  if (token.startsWith('APP_USR-')) return 'app_usr';
   return 'unknown';
 }
 
@@ -44,20 +41,22 @@ export async function getAccountInfo() {
 }
 
 export async function getSellerMode() {
+  if (isMockPaymentMode()) return 'mock';
   if (process.env.MP_SANDBOX === 'true') return 'test';
+
+  if (isMercadoPagoConfigured()) {
+    try {
+      const account = await getAccountInfo();
+      if (isTestSellerAccount(account)) return 'test';
+      return 'production';
+    } catch {
+      // Si MP no responde, usar credencial y MP_SANDBOX como respaldo.
+    }
+  }
+
   if (process.env.MP_SANDBOX === 'false') return 'production';
-
-  const credentialMode = getCredentialMode();
-  if (credentialMode === 'test' || credentialMode === 'production') {
-    return credentialMode;
-  }
-
-  try {
-    const account = await getAccountInfo();
-    return isTestSellerAccount(account) ? 'test' : 'production';
-  } catch {
-    return 'unknown';
-  }
+  if (getCredentialMode() === 'test') return 'test';
+  return 'unknown';
 }
 
 function getClient() {
