@@ -2,8 +2,12 @@ import { MercadoPagoConfig, Payment, Preference, User } from 'mercadopago';
 
 let cachedAccountInfo = null;
 
+export function getAccessToken() {
+  return (process.env.MP_ACCESS_TOKEN_PROD || process.env.MP_ACCESS_TOKEN || '').trim();
+}
+
 export function getCredentialMode() {
-  const token = process.env.MP_ACCESS_TOKEN?.trim() || '';
+  const token = getAccessToken();
   if (token.startsWith('TEST-')) return 'test';
   if (token.startsWith('APP_USR-')) return 'app_usr';
   return 'unknown';
@@ -14,7 +18,7 @@ export function isMockPaymentMode() {
 }
 
 export function isMercadoPagoConfigured() {
-  const token = process.env.MP_ACCESS_TOKEN?.trim();
+  const token = getAccessToken();
   if (!token) return false;
   if (token.includes('tu_token') || token === 'TEST-') return false;
   return token.length >= 20;
@@ -33,7 +37,7 @@ export function isTestSellerAccount(account) {
 }
 
 export async function getAccountInfo() {
-  const token = process.env.MP_ACCESS_TOKEN?.trim() || '';
+  const token = getAccessToken();
   if (cachedAccountInfo?.token === token) return cachedAccountInfo.account;
 
   const client = getClient();
@@ -63,7 +67,7 @@ export async function getSellerMode() {
 }
 
 function getClient() {
-  const accessToken = process.env.MP_ACCESS_TOKEN?.trim();
+  const accessToken = getAccessToken();
 
   if (!accessToken) {
     throw new Error('MP_NOT_CONFIGURED');
@@ -160,7 +164,7 @@ export async function fetchPayment(paymentId) {
 export async function searchPaymentsByReference(externalReference) {
   if (isMockPaymentMode() || !isMercadoPagoConfigured()) return [];
 
-  const token = process.env.MP_ACCESS_TOKEN?.trim();
+  const token = getAccessToken();
   const url = new URL('https://api.mercadopago.com/v1/payments/search');
   url.searchParams.set('sort', 'date_created');
   url.searchParams.set('criteria', 'desc');
