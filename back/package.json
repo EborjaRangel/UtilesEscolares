@@ -19,7 +19,6 @@
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
     "mercadopago": "^3.1.0",
-    "pg": "^8.13.0",
-    "utiles-escolares": "file:.."
+    "pg": "^8.13.0"
   }
 }
