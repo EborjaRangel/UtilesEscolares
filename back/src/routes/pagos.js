@@ -4,10 +4,12 @@ import { authMiddleware } from '../middleware/auth.js';
 import {
   createCheckoutPreference,
   fetchPayment,
+  getAccountInfo,
   getSellerMode,
   isMercadoPagoConfigured,
   isMockPaymentMode,
   isPaymentEnabled,
+  isTestSellerAccount,
   MP_MIN_CARD_AMOUNT_MXN,
 } from '../services/mercadopago.js';
 import { syncPedidoFromMercadoPago, updatePedidoPago } from '../services/pedidoPago.js';
@@ -16,12 +18,25 @@ const router = Router();
 
 router.get('/config', async (_req, res) => {
   const sellerMode = isMockPaymentMode() ? 'mock' : await getSellerMode();
+  let sellerAccount = null;
+
+  try {
+    const account = await getAccountInfo();
+    sellerAccount = {
+      id: account.id,
+      nickname: account.nickname,
+      testUser: isTestSellerAccount(account),
+    };
+  } catch {
+    sellerAccount = null;
+  }
 
   res.json({
     provider: 'mercadopago',
     mode: sellerMode,
     enabled: isPaymentEnabled(),
     testMode: sellerMode === 'test' || sellerMode === 'mock',
+    sellerAccount,
     hint:
       sellerMode === 'production'
         ? `Mercado Pago exige mínimo $${MP_MIN_CARD_AMOUNT_MXN} MXN para pagar con Visa/Mastercard. Usa incógnito, paga sin cuenta del vendedor y escribe la tarjeta sin espacios.`

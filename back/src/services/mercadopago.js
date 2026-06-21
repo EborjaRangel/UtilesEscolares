@@ -33,11 +33,14 @@ export function isTestSellerAccount(account) {
 }
 
 export async function getAccountInfo() {
-  if (cachedAccountInfo) return cachedAccountInfo;
+  const token = process.env.MP_ACCESS_TOKEN?.trim() || '';
+  if (cachedAccountInfo?.token === token) return cachedAccountInfo.account;
+
   const client = getClient();
   const userClient = new User(client);
-  cachedAccountInfo = await userClient.get();
-  return cachedAccountInfo;
+  const account = await userClient.get();
+  cachedAccountInfo = { token, account };
+  return account;
 }
 
 export async function getSellerMode() {
