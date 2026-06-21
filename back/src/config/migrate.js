@@ -1,7 +1,10 @@
 import pool from './db.js';
-import { loadMercadoPagoTokenFromDb } from '../services/mercadopago.js';
 
 export async function ensureDatabaseSchema() {
+  if (!process.env.DATABASE_URL?.trim()) {
+    throw new Error('DATABASE_URL no está configurada en las variables de entorno.');
+  }
+
   try {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS usuarios (
@@ -161,9 +164,8 @@ export async function ensureDatabaseSchema() {
       `);
     }
 
-    await loadMercadoPagoTokenFromDb();
   } catch (error) {
-    console.error('Error al verificar esquema de base de datos:', error.message);
+    console.error('Error al verificar esquema de base de datos:', error.message || error);
     throw error;
   }
 }

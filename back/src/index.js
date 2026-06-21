@@ -6,7 +6,7 @@ import paquetesRoutes from './routes/paquetes.js';
 import pedidosRoutes from './routes/pedidos.js';
 import pagosRoutes from './routes/pagos.js';
 import adminCajaRoutes from './routes/admin/caja.js';
-import { isMercadoPagoConfigured, isMockPaymentMode, getSellerMode } from './services/mercadopago.js';
+import { isMercadoPagoConfigured, isMockPaymentMode, getSellerMode, loadMercadoPagoTokenFromDb } from './services/mercadopago.js';
 import { ensureDatabaseSchema } from './config/migrate.js';
 
 dotenv.config();
@@ -32,6 +32,7 @@ app.use((_req, res) => {
 });
 
 ensureDatabaseSchema()
+  .then(() => loadMercadoPagoTokenFromDb())
   .then(() => {
     if (isMockPaymentMode()) {
       console.warn('⚠️  MP_PAYMENT_MODE=mock — pagos simulados, no se usa Mercado Pago real.');
