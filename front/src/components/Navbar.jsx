@@ -28,8 +28,8 @@ export default function Navbar() {
     const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
     return `block rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
       isActive
-        ? 'bg-escolar-yellow/30 text-escolar-navy'
-        : 'text-escolar-navy/80 hover:bg-escolar-sky hover:text-escolar-navy'
+        ? 'bg-escolar-yellow/30 text-gray-400'
+        : 'text-gray-400 hover:bg-white/50 hover:text-gray-500'
     }`;
   };
 
