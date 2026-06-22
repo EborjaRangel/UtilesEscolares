@@ -26,7 +26,7 @@ export default function Navbar() {
 
   const linkClass = (href) => {
     const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href);
-    return `block rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
+    return `block rounded-lg px-3 py-2.5 text-xs font-semibold uppercase tracking-wide transition ${
       isActive
         ? 'bg-escolar-yellow/30 text-gray-400'
         : 'text-gray-400 hover:bg-white/50 hover:text-gray-500'
