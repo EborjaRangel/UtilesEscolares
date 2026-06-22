@@ -25,14 +25,26 @@ router.get('/config', async (_req, res) => {
   const sellerMode = isMockPaymentMode() ? 'mock' : await getSellerMode();
   let sellerAccount = null;
   let dbTokenRow = false;
+  let dbInfo = null;
 
   try {
-    const rowCheck = await pool.query(
-      "SELECT 1 FROM app_settings WHERE key = 'mercadopago_token' LIMIT 1"
-    );
-    dbTokenRow = rowCheck.rowCount > 0;
-  } catch {
-    dbTokenRow = false;
+    const info = await pool.query(`
+      SELECT
+        current_database() AS database_name,
+        EXISTS (
+          SELECT 1 FROM information_schema.tables
+          WHERE table_schema = 'public' AND table_name = 'app_settings'
+        ) AS app_settings_table
+    `);
+    dbInfo = info.rows[0];
+    if (dbInfo?.app_settings_table) {
+      const rowCheck = await pool.query(
+        "SELECT 1 FROM app_settings WHERE key = 'mercadopago_token' LIMIT 1"
+      );
+      dbTokenRow = rowCheck.rowCount > 0;
+    }
+  } catch (error) {
+    dbInfo = { error: error.message };
   }
 
   try {
@@ -55,6 +67,7 @@ router.get('/config', async (_req, res) => {
     credentialUserId: getAccessToken().split('-').pop() || null,
     credentialSource: getAccessTokenSource(),
     dbTokenRow,
+    dbInfo,
     mpEnvVars: Object.keys(process.env)
       .filter((key) => key.startsWith('MP_') || key === 'MERCADOPAGO_TOKEN')
       .sort(),
