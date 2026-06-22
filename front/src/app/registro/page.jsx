@@ -52,8 +52,8 @@ export default function RegisterPage() {
           {({ isSubmitting }) => (
             <Form>
               <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 sm:gap-4">
-                <FormField label="Nombre" name="nombre" placeholder="María" />
-                <FormField label="Apellido" name="apellido" placeholder="García" />
+                <FormField label="Nombre" name="nombre" placeholder="Tu nombre" />
+                <FormField label="Primer apellido" name="apellido" placeholder="Tu primer apellido" />
               </div>
               <FormField
                 label="Correo electrónico"
