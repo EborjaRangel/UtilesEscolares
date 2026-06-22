@@ -56,11 +56,11 @@ export async function updatePedidoPago(pedidoId, paymentId, mpStatus, paymentDet
 
   const result = await pool.query(
     `UPDATE pedidos
-     SET pago_estado = $1,
-         estado = $2,
-         mp_payment_id = COALESCE($3, mp_payment_id),
+     SET pago_estado = $1::varchar,
+         estado = $2::varchar,
+         mp_payment_id = COALESCE($3::varchar, mp_payment_id),
          pagado_at = CASE
-           WHEN $1 = 'approved' THEN COALESCE(pagado_at, CURRENT_TIMESTAMP)
+           WHEN $1::varchar = 'approved' THEN COALESCE(pagado_at, CURRENT_TIMESTAMP)
            ELSE pagado_at
          END,
          updated_at = CURRENT_TIMESTAMP
