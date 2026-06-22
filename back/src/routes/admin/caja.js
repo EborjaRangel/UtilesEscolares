@@ -218,8 +218,8 @@ router.patch('/pedidos/:id/estado', async (req, res) => {
 
     const result = await pool.query(
       `UPDATE pedidos
-       SET estado = $1,
-           entregado_at = CASE WHEN $1 = 'entregado' THEN CURRENT_TIMESTAMP ELSE NULL END,
+       SET estado = $1::varchar,
+           entregado_at = CASE WHEN $1::varchar = 'entregado' THEN CURRENT_TIMESTAMP ELSE NULL END,
            updated_at = CURRENT_TIMESTAMP
        WHERE id = $2
        RETURNING id`,
