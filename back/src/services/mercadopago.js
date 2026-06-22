@@ -20,6 +20,11 @@ export function getAccessTokenSource() {
   return null;
 }
 
+export async function ensureMercadoPagoTokenLoaded() {
+  if (getAccessToken()) return;
+  await loadMercadoPagoTokenFromDb();
+}
+
 export async function loadMercadoPagoTokenFromDb() {
   try {
     const result = await pool.query(
@@ -79,6 +84,8 @@ export async function getAccountInfo() {
 export async function getSellerMode() {
   if (isMockPaymentMode()) return 'mock';
   if (process.env.MP_SANDBOX === 'true') return 'test';
+
+  await ensureMercadoPagoTokenLoaded();
 
   if (isMercadoPagoConfigured()) {
     try {

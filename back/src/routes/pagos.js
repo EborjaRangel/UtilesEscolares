@@ -7,6 +7,7 @@ import {
   getAccountInfo,
   getAccessToken,
   getAccessTokenSource,
+  ensureMercadoPagoTokenLoaded,
   getSellerMode,
   isMercadoPagoConfigured,
   isMockPaymentMode,
@@ -19,8 +20,20 @@ import { syncPedidoFromMercadoPago, updatePedidoPago } from '../services/pedidoP
 const router = Router();
 
 router.get('/config', async (_req, res) => {
+  await ensureMercadoPagoTokenLoaded();
+
   const sellerMode = isMockPaymentMode() ? 'mock' : await getSellerMode();
   let sellerAccount = null;
+  let dbTokenRow = false;
+
+  try {
+    const rowCheck = await pool.query(
+      "SELECT 1 FROM app_settings WHERE key = 'mercadopago_token' LIMIT 1"
+    );
+    dbTokenRow = rowCheck.rowCount > 0;
+  } catch {
+    dbTokenRow = false;
+  }
 
   try {
     const account = await getAccountInfo();
@@ -41,6 +54,7 @@ router.get('/config', async (_req, res) => {
     sellerAccount,
     credentialUserId: getAccessToken().split('-').pop() || null,
     credentialSource: getAccessTokenSource(),
+    dbTokenRow,
     mpEnvVars: Object.keys(process.env)
       .filter((key) => key.startsWith('MP_') || key === 'MERCADOPAGO_TOKEN')
       .sort(),
