@@ -9,7 +9,6 @@ export function getAccessToken() {
     process.env.MERCADOPAGO_TOKEN?.trim() ||
     dbAccessToken ||
     process.env.MP_ACCESS_TOKEN_PROD?.trim() ||
-    process.env.MP_ACCESS_TOKEN?.trim() ||
     ''
   );
 }
@@ -18,7 +17,6 @@ export function getAccessTokenSource() {
   if (process.env.MERCADOPAGO_TOKEN?.trim()) return 'MERCADOPAGO_TOKEN';
   if (dbAccessToken) return 'database';
   if (process.env.MP_ACCESS_TOKEN_PROD?.trim()) return 'MP_ACCESS_TOKEN_PROD';
-  if (process.env.MP_ACCESS_TOKEN?.trim()) return 'MP_ACCESS_TOKEN';
   return null;
 }
 
