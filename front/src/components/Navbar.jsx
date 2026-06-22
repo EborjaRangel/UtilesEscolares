@@ -65,7 +65,7 @@ export default function Navbar() {
   const displayName = user ? [user.nombre, user.apellido].filter(Boolean).join(' ') : '';
 
   return (
-    <header className="sticky top-0 z-50 border-b border-escolar-sky/60 bg-white/95 shadow-sm backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-escolar-blue/10 bg-escolar-sky/90 shadow-sm backdrop-blur-md">
       <div className="container-app">
         <div className="flex items-center justify-between gap-2 py-3 sm:py-4">
           <Link
